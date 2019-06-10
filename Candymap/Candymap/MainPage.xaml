@@ -6,9 +6,10 @@
              x:Class="Candymap.MainPage"
              BackgroundColor="White">
 
-    <ScrollView  x:Name="MainScrollView" >
-        <AbsoluteLayout>
-            <skia:SKCanvasView  AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="SizeProportional"  x:Name="SkCanvasView"/>
+    <ScrollView  x:Name="MainScrollView">
+        <AbsoluteLayout HorizontalOptions="FillAndExpand">
+            <StackLayout AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="SizeProportional" x:Name="ImageStack" HorizontalOptions="Start" ></StackLayout>
+            <skia:SKCanvasView AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="SizeProportional" x:Name="SkCanvasView" HorizontalOptions="StartAndExpand"/>
             <AbsoluteLayout x:Name="MainAbsoluteLayout">
             </AbsoluteLayout>
         </AbsoluteLayout>
