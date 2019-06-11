@@ -22,7 +22,7 @@ namespace Candymap
             int numButtonsInPattern = 6;
             var widgetWidth = 350;                          //Width of buttons screen
             int heightScale = 60;
-            Color buttonColor = Color.Default;
+            Color buttonColor = Color.Transparent;
             int buttonWidth = 60;
             int buttonHeight = 60;
             //int randomnessFactor = 50;
@@ -43,7 +43,14 @@ namespace Candymap
             int TotalIterations = 0;
             var lastPoints = new List<SKPoint>();
             var firstPoints = new List<SKPoint>();
-
+            SKPaint strokePaint = new SKPaint
+            {
+                Style = SKPaintStyle.Stroke,
+                Color = SKColors.Black,
+                StrokeWidth = 2,
+                IsAntialias = true,
+                StrokeCap = SKStrokeCap.Round,
+            };
 
 
             void buttonCreater(int iteration)
@@ -123,14 +130,6 @@ namespace Candymap
 
             void Draw_RandomShape(SKCanvas skCanvas, int curveNumber)
             {
-                SKPaint strokePaint = new SKPaint
-                {
-                    Style = SKPaintStyle.Stroke,
-                    Color = SKColors.Black,
-                    StrokeWidth = 2,
-                    IsAntialias = true,
-                    StrokeCap = SKStrokeCap.Round,
-                };
                 try
                 {
                     for (var i = 0; i < lastPoints.Count; i++)
@@ -138,13 +137,14 @@ namespace Candymap
                         /*skLineList.Add(new SKPoint[] {
                             lastPoints[i],firstPoints[i+1]
                         });*/
-
+                        var firstLineElem = new SKPoint[] { new SKPoint(lastPoints[i].X, lastPoints[i].Y-5), new SKPoint(firstPoints[i + 1].X-5, firstPoints[i + 1].Y ) };
+                        var secondLineElem = new SKPoint[] { new SKPoint(lastPoints[i].X , lastPoints[i].Y+5), new SKPoint(firstPoints[i + 1].X+5, firstPoints[i + 1].Y) };
                         using (SKPath path = new SKPath())
-                        {
-                            path.MoveTo(lastPoints[i]);
-                            path.ArcTo(new SKPoint(180, 180), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, firstPoints[i + 1]);
-                            path.MoveTo(lastPoints[i]);
-                            path.ArcTo(new SKPoint(180, 180), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, firstPoints[i + 1]);
+                        {                                                                                   //5->6
+                            path.MoveTo(firstLineElem[0]);
+                            path.ArcTo(new SKPoint(180, 180), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, firstLineElem[1]);
+                            path.MoveTo(secondLineElem[0]);
+                            path.ArcTo(new SKPoint(180, 180), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, secondLineElem[1]);
                             skCanvas.DrawPath(path, strokePaint);
                         }
                         
@@ -154,118 +154,68 @@ namespace Candymap
 
                 skLineList = skLineList.Distinct().ToList();
                 bool firstDone = false;
-                bool secondDone = false;
                 var donePoints = new List<SKPoint[]>();
-                bool nextis3 = false;
 
                 foreach (var elem in skLineList) {
                     if (!donePoints.Contains(elem))
                     {
+                        ;
                         //skCanvas.DrawLine(elem[0].X, elem[0].Y, elem[1].X, elem[1].Y, strokePaint);
                         using (SKPath path = new SKPath())
                         {
                             if ((elem[1].Y - elem[0].Y) > 0 && (elem[1].X - elem[0].X) > 0 && !firstDone)
                             {  //0 -> 1
-                                path.MoveTo(elem[0]);
-                                path.ArcTo(new SKPoint(180, 180), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, elem[1]);
-                                path.MoveTo(elem[0]);
-                                path.ArcTo(new SKPoint(180, 180), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, elem[1]);
+                                var firstLineElem = new SKPoint[] { new SKPoint(elem[0].X - 5, elem[0].Y), new SKPoint(elem[1].X, elem[1].Y + 5) };
+                                var secondLineElem = new SKPoint[] { new SKPoint(elem[0].X + 5, elem[0].Y), new SKPoint(elem[1].X, elem[1].Y - 5) };
+                                path.MoveTo(firstLineElem[0]);
+                                path.ArcTo(new SKPoint(180, 180), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, firstLineElem[1]);
+                                path.MoveTo(secondLineElem[0]);
+                                path.ArcTo(new SKPoint(180, 180), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, secondLineElem[1]);
 
                                 firstDone = true;
                             }
                             else if ((elem[1].Y - elem[0].Y) > 0 && (elem[1].X - elem[0].X) > 0 && firstDone)
                             {  //2 -> 3
-                                path.MoveTo(elem[0]);
-                                path.ArcTo(new SKPoint(180, 180), 45, SKPathArcSize.Small, SKPathDirection.Clockwise, elem[1]);
-                                path.MoveTo(elem[0]);
-                                path.ArcTo(new SKPoint(180, 180), 45, SKPathArcSize.Small, SKPathDirection.Clockwise, elem[1]);
+                                var firstLineElem = new SKPoint[] { new SKPoint(elem[0].X, elem[0].Y+5), new SKPoint(elem[1].X-5, elem[1].Y ) };
+                                var secondLineElem = new SKPoint[] { new SKPoint(elem[0].X , elem[0].Y-5), new SKPoint(elem[1].X+5, elem[1].Y) };
+                                path.MoveTo(firstLineElem[0]);
+                                path.ArcTo(new SKPoint(180, 180), 45, SKPathArcSize.Small, SKPathDirection.Clockwise, firstLineElem[1]);
+                                path.MoveTo(secondLineElem[0]);
+                                path.ArcTo(new SKPoint(180, 180), 45, SKPathArcSize.Small, SKPathDirection.Clockwise, secondLineElem[1]);
 
                                 firstDone = false;
                             }
                             if ((elem[1].Y - elem[0].Y) < 0 && (elem[1].X - elem[0].X) > 0)
                             {  //1 -> 2
-                                path.MoveTo(elem[0]);
-                                path.ArcTo(new SKPoint(180, 180), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, elem[1]);
-                                path.MoveTo(elem[0]);
-                                path.ArcTo(new SKPoint(180, 180), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, elem[1]);
+                                var firstLineElem = new SKPoint[] { new SKPoint(elem[0].X, elem[0].Y - 5), new SKPoint(elem[1].X, elem[1].Y - 5) };
+                                var secondLineElem = new SKPoint[] { new SKPoint(elem[0].X, elem[0].Y + 5), new SKPoint(elem[1].X, elem[1].Y + 5) };
+                                path.MoveTo(firstLineElem[0]);
+                                path.ArcTo(new SKPoint(180, 180), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, firstLineElem[1]);
+                                path.MoveTo(secondLineElem[0]);
+                                path.ArcTo(new SKPoint(180, 180), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, secondLineElem[1]);
                             }
                              
                              if ((elem[1].Y - elem[0].Y) > 0 && (elem[1].X - elem[0].X) < 0)
                             {  //3 -> 4
-                                path.MoveTo(elem[0]);
-                                path.ArcTo(new SKPoint(180, 180), 45, SKPathArcSize.Small, SKPathDirection.Clockwise, elem[1]);
-                                path.MoveTo(elem[0]);
-                                path.ArcTo(new SKPoint(180, 180), 45, SKPathArcSize.Small, SKPathDirection.Clockwise, elem[1]);
+                                var firstLineElem = new SKPoint[] { new SKPoint(elem[0].X - 5, elem[0].Y), new SKPoint(elem[1].X, elem[1].Y - 5) };
+                                var secondLineElem = new SKPoint[] { new SKPoint(elem[0].X + 5, elem[0].Y), new SKPoint(elem[1].X, elem[1].Y + 5) };
+                                path.MoveTo(firstLineElem[0]);
+                                path.ArcTo(new SKPoint(180, 180), 45, SKPathArcSize.Small, SKPathDirection.Clockwise, firstLineElem[1]);
+                                path.MoveTo(secondLineElem[0]);
+                                path.ArcTo(new SKPoint(180, 180), 45, SKPathArcSize.Small, SKPathDirection.Clockwise, secondLineElem[1]);
                                 
                             }
                             if ((elem[1].Y - elem[0].Y) < 0 && (elem[1].X - elem[0].X) < 0)
                             {  //4 -> 5
-                                path.MoveTo(elem[0]);
-                                path.ArcTo(new SKPoint(180, 180), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, elem[1]);
-                                path.MoveTo(elem[0]);
-                                path.ArcTo(new SKPoint(180, 180), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, elem[1]);
+                                var firstLineElem = new SKPoint[] { new SKPoint(elem[0].X - 5, elem[0].Y), new SKPoint(elem[1].X, elem[1].Y + 5) };
+                                var secondLineElem = new SKPoint[] { new SKPoint(elem[0].X + 5, elem[0].Y), new SKPoint(elem[1].X, elem[1].Y - 5) };
+                                path.MoveTo(firstLineElem[0]);
+                                path.ArcTo(new SKPoint(180, 180), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, firstLineElem[1]);
+                                path.MoveTo(secondLineElem[0]);
+                                path.ArcTo(new SKPoint(180, 180), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, secondLineElem[1]);
                             }
                              
-
-
-                            /*if (!donePoints.Contains(elem))
-                            {
-                                if (curveNumber == 0)
-                                {
-                                    path.MoveTo(elem[0]);
-                                    path.ArcTo(new SKPoint(180, 180), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, elem[1]);
-                                    path.MoveTo(elem[0]);
-                                    path.ArcTo(new SKPoint(180, 180), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, elem[1]);
-                                    curveNumber++;
-                                }
-                                else if (curveNumber == 1)
-                                {
-                                    path.MoveTo(elem[0]);
-                                    path.ArcTo(new SKPoint(180, 180), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, elem[1]);
-                                    path.MoveTo(elem[0]);
-                                    path.ArcTo(new SKPoint(180, 180), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, elem[1]);
-                                    curveNumber++;
-                                }
-                                else if (curveNumber == 2)
-                                {
-                                    path.MoveTo(elem[0]);
-                                    path.ArcTo(new SKPoint(180, 180), 45, SKPathArcSize.Small, SKPathDirection.Clockwise, elem[1]);
-                                    path.MoveTo(elem[0]);
-                                    path.ArcTo(new SKPoint(180, 180), 45, SKPathArcSize.Small, SKPathDirection.Clockwise, elem[1]);
-                                    curveNumber++;
-                                }
-                                else if (curveNumber == 3)
-                                {
-                                    path.MoveTo(elem[0]);
-                                    path.ArcTo(new SKPoint(180, 180), 45, SKPathArcSize.Small, SKPathDirection.Clockwise, elem[1]);
-                                    path.MoveTo(elem[0]);
-                                    path.ArcTo(new SKPoint(180, 180), 45, SKPathArcSize.Small, SKPathDirection.Clockwise, elem[1]);
-                                    curveNumber++;
-                                }
-                                else if (curveNumber == 4)
-                                {
-                                    path.MoveTo(elem[0]);
-                                    path.ArcTo(new SKPoint(180, 180), 45, SKPathArcSize.Small, SKPathDirection.Clockwise, elem[1]);
-                                    path.MoveTo(elem[0]);
-                                    path.ArcTo(new SKPoint(180, 180), 45, SKPathArcSize.Small, SKPathDirection.Clockwise, elem[1]);
-                                    curveNumber++;
-                                }
-                                else if (curveNumber == 5)
-                                {
-                                    path.MoveTo(elem[0]);
-                                    path.ArcTo(new SKPoint(180, 180), 45, SKPathArcSize.Small, SKPathDirection.Clockwise, elem[1]);
-                                    path.MoveTo(elem[0]);
-                                    path.ArcTo(new SKPoint(180, 180), 45, SKPathArcSize.Small, SKPathDirection.Clockwise, elem[1]);
-                                    curveNumber = 0;
-                                }*/
-
                             donePoints.Add(elem);
-                            //SKPoint center = new SKPoint(10+(elem[0].X + elem[1].X)/2.0f,10+(elem[0].Y + elem[1].Y) /2.0f);
-
-                            //ArcTo (Single rx, Single ry, Single xAxisRotate, SKPathArcSize largeArc, SKPathDirection sweep, Single x, Single y)
-                            /*path.ArcTo(new SKPoint(180,180), 45, SKPathArcSize.Small, SKPathDirection.Clockwise, elem[1]);
-                            path.MoveTo(elem[0]);
-                            path.ArcTo(new SKPoint(180,180), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, elem[1]);*/
                             skCanvas.DrawPath(path, strokePaint);
                         }
                 }
