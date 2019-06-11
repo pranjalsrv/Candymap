@@ -65,14 +65,29 @@ namespace Candymap
                     int indexForButtonText = buttons.Count - 1;
                     //if (indexForButtonText == 241) { color = Color.Green; }
                     //else { color = Color.Default; }
-                    buttons.Add(new Button
+
+                    if (i % 3 != 0)
                     {
-                        Text = (indexForButtonText + 1).ToString(),
-                        WidthRequest = buttonWidth,
-                        HeightRequest = buttonHeight,
-                        CornerRadius = 30,
-                        BackgroundColor = buttonColor
-                    });
+                        buttons.Add(new Button
+                        {
+                            //Text = (indexForButtonText + 1).ToString(),
+                            WidthRequest = buttonWidth,
+                            HeightRequest = buttonHeight,
+                            CornerRadius = 30,
+                            BackgroundColor = buttonColor
+                        });
+                    }
+                    else
+                    {
+                        buttons.Add(new Button
+                        {
+                            Text = (indexForButtonText + 1).ToString(),
+                            WidthRequest = buttonWidth,
+                            HeightRequest = buttonHeight,
+                            CornerRadius = 30,
+                            BackgroundColor = Color.Green
+                        });
+                    }
 
                     int currentButtonIndex = buttons.Count - 1;
                     int placementIndex = currentButtonIndex;
@@ -142,9 +157,9 @@ namespace Candymap
                         using (SKPath path = new SKPath())
                         {                                                                                   //5->6
                             path.MoveTo(firstLineElem[0]);
-                            path.ArcTo(new SKPoint(180, 180), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, firstLineElem[1]);
+                            path.ArcTo(new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, firstLineElem[1]);
                             path.MoveTo(secondLineElem[0]);
-                            path.ArcTo(new SKPoint(180, 180), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, secondLineElem[1]);
+                            path.ArcTo(new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, secondLineElem[1]);
                             skCanvas.DrawPath(path, strokePaint);
                         }
                         
@@ -168,9 +183,9 @@ namespace Candymap
                                 var firstLineElem = new SKPoint[] { new SKPoint(elem[0].X - 5, elem[0].Y), new SKPoint(elem[1].X, elem[1].Y + 5) };
                                 var secondLineElem = new SKPoint[] { new SKPoint(elem[0].X + 5, elem[0].Y), new SKPoint(elem[1].X, elem[1].Y - 5) };
                                 path.MoveTo(firstLineElem[0]);
-                                path.ArcTo(new SKPoint(180, 180), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, firstLineElem[1]);
+                                path.ArcTo(new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, firstLineElem[1]);
                                 path.MoveTo(secondLineElem[0]);
-                                path.ArcTo(new SKPoint(180, 180), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, secondLineElem[1]);
+                                path.ArcTo(new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, secondLineElem[1]);
 
                                 firstDone = true;
                             }
@@ -179,9 +194,9 @@ namespace Candymap
                                 var firstLineElem = new SKPoint[] { new SKPoint(elem[0].X, elem[0].Y+5), new SKPoint(elem[1].X-5, elem[1].Y ) };
                                 var secondLineElem = new SKPoint[] { new SKPoint(elem[0].X , elem[0].Y-5), new SKPoint(elem[1].X+5, elem[1].Y) };
                                 path.MoveTo(firstLineElem[0]);
-                                path.ArcTo(new SKPoint(180, 180), 45, SKPathArcSize.Small, SKPathDirection.Clockwise, firstLineElem[1]);
+                                path.ArcTo(new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.Clockwise, firstLineElem[1]);
                                 path.MoveTo(secondLineElem[0]);
-                                path.ArcTo(new SKPoint(180, 180), 45, SKPathArcSize.Small, SKPathDirection.Clockwise, secondLineElem[1]);
+                                path.ArcTo(new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.Clockwise, secondLineElem[1]);
 
                                 firstDone = false;
                             }
@@ -189,10 +204,18 @@ namespace Candymap
                             {  //1 -> 2
                                 var firstLineElem = new SKPoint[] { new SKPoint(elem[0].X, elem[0].Y - 5), new SKPoint(elem[1].X, elem[1].Y - 5) };
                                 var secondLineElem = new SKPoint[] { new SKPoint(elem[0].X, elem[0].Y + 5), new SKPoint(elem[1].X, elem[1].Y + 5) };
+                                var midpoint1 = new SKPoint((firstLineElem[0].X + firstLineElem[1].X) / 2, ((firstLineElem[0].Y + firstLineElem[1].Y) / 2));
+                                var midpoint2 = new SKPoint((secondLineElem[0].X + secondLineElem[1].X) / 2, ((secondLineElem[0].Y + secondLineElem[1].Y) / 2));
+
                                 path.MoveTo(firstLineElem[0]);
-                                path.ArcTo(new SKPoint(180, 180), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, firstLineElem[1]);
+                                path.ArcTo(new SKPoint(70, 70), 55, SKPathArcSize.Small, SKPathDirection.CounterClockwise, midpoint1);
                                 path.MoveTo(secondLineElem[0]);
-                                path.ArcTo(new SKPoint(180, 180), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, secondLineElem[1]);
+                                path.ArcTo(new SKPoint(70, 70), 55, SKPathArcSize.Small, SKPathDirection.CounterClockwise, midpoint2);
+
+                                path.MoveTo(midpoint1);
+                                path.ArcTo(new SKPoint(70, 70), 55, SKPathArcSize.Small, SKPathDirection.Clockwise, firstLineElem[1]);
+                                path.MoveTo(midpoint2);
+                                path.ArcTo(new SKPoint(70, 70), 55, SKPathArcSize.Small, SKPathDirection.Clockwise, secondLineElem[1]);
                             }
                              
                              if ((elem[1].Y - elem[0].Y) > 0 && (elem[1].X - elem[0].X) < 0)
@@ -200,19 +223,28 @@ namespace Candymap
                                 var firstLineElem = new SKPoint[] { new SKPoint(elem[0].X - 5, elem[0].Y), new SKPoint(elem[1].X, elem[1].Y - 5) };
                                 var secondLineElem = new SKPoint[] { new SKPoint(elem[0].X + 5, elem[0].Y), new SKPoint(elem[1].X, elem[1].Y + 5) };
                                 path.MoveTo(firstLineElem[0]);
-                                path.ArcTo(new SKPoint(180, 180), 45, SKPathArcSize.Small, SKPathDirection.Clockwise, firstLineElem[1]);
+                                path.ArcTo(new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.Clockwise, firstLineElem[1]);
                                 path.MoveTo(secondLineElem[0]);
-                                path.ArcTo(new SKPoint(180, 180), 45, SKPathArcSize.Small, SKPathDirection.Clockwise, secondLineElem[1]);
+                                path.ArcTo(new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.Clockwise, secondLineElem[1]);
                                 
                             }
                             if ((elem[1].Y - elem[0].Y) < 0 && (elem[1].X - elem[0].X) < 0)
                             {  //4 -> 5
-                                var firstLineElem = new SKPoint[] { new SKPoint(elem[0].X - 5, elem[0].Y), new SKPoint(elem[1].X, elem[1].Y + 5) };
-                                var secondLineElem = new SKPoint[] { new SKPoint(elem[0].X + 5, elem[0].Y), new SKPoint(elem[1].X, elem[1].Y - 5) };
+                                
+                                var firstLineElem = new SKPoint[] { new SKPoint(elem[0].X , elem[0].Y-5), new SKPoint(elem[1].X, elem[1].Y -5) };
+                                var secondLineElem = new SKPoint[] { new SKPoint(elem[0].X , elem[0].Y+5), new SKPoint(elem[1].X, elem[1].Y + 5) };
+                                var midpoint1 = new SKPoint((firstLineElem[0].X + firstLineElem[1].X) / 2, ((firstLineElem[0].Y + firstLineElem[1].Y) / 2));
+                                var midpoint2 = new SKPoint((secondLineElem[0].X + secondLineElem[1].X) / 2, ((secondLineElem[0].Y + secondLineElem[1].Y) / 2));
+
                                 path.MoveTo(firstLineElem[0]);
-                                path.ArcTo(new SKPoint(180, 180), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, firstLineElem[1]);
+                                path.ArcTo(new SKPoint(70, 70), 55, SKPathArcSize.Small, SKPathDirection.Clockwise, midpoint1);
                                 path.MoveTo(secondLineElem[0]);
-                                path.ArcTo(new SKPoint(180, 180), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, secondLineElem[1]);
+                                path.ArcTo(new SKPoint(70, 70), 55, SKPathArcSize.Small, SKPathDirection.Clockwise, midpoint2);
+
+                                path.MoveTo(midpoint1);
+                                path.ArcTo(new SKPoint(70, 70), 55, SKPathArcSize.Small, SKPathDirection.CounterClockwise, firstLineElem[1]);
+                                path.MoveTo(midpoint2);
+                                path.ArcTo(new SKPoint(70, 70), 55, SKPathArcSize.Small, SKPathDirection.CounterClockwise, secondLineElem[1]);
                             }
                              
                             donePoints.Add(elem);
