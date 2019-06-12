@@ -7,10 +7,11 @@
              BackgroundColor="White">
 
     <ScrollView  x:Name="MainScrollView">
-        <AbsoluteLayout HorizontalOptions="FillAndExpand">
-            <StackLayout AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="SizeProportional" x:Name="ImageStack" HorizontalOptions="Start" ></StackLayout>
-            <skia:SKCanvasView AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="SizeProportional" x:Name="SkCanvasView" HorizontalOptions="StartAndExpand"/>
-            <AbsoluteLayout x:Name="MainAbsoluteLayout">
+        <AbsoluteLayout>
+            <skia:SKCanvasView x:Name="SkCanvasView" AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="SizeProportional" HorizontalOptions="Start"/>
+            <AbsoluteLayout x:Name="MainAbsoluteLayout" AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="SizeProportional" HorizontalOptions="Start">
+            </AbsoluteLayout>
+            <AbsoluteLayout x:Name="ScoreLayout" AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="SizeProportional" HorizontalOptions="Start">
             </AbsoluteLayout>
         </AbsoluteLayout>
     </ScrollView>
