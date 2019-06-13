@@ -20,13 +20,13 @@ namespace Candymap
             InitializeComponent();
 
             int numButtonsInPattern = 6;
-            var widgetWidth = 350;                          //Width of buttons screen               250----350
+            var widgetWidth = 250;                          //Width of buttons screen               250----350
             Color buttonColor = Color.Transparent;
             int buttonWidth = 60;
             int buttonHeight = 60;
             //int randomnessFactor = 50;
-            var curlinessFactor = 60;                       //Change if changing widgetWidth          30----60
-
+            var curlinessFactor = 30;                       //Change if changing widgetWidth          30----60
+            float currentScore = 8000;
 
             int heightScale = widgetWidth / numButtonsInPattern;
             int scrollThreshold = heightScale * numButtonsInPattern / 4;
@@ -40,13 +40,15 @@ namespace Candymap
             Size size = Device.Info.PixelScreenSize;
             double screenWidth = size.Width;
             double screenHeight = size.Height;
+            float traversedScore = 0.0f;
             int TotalIterations = 0;
             var lastPoints = new List<SKPoint>();
             var firstPoints = new List<SKPoint>();
             var scorePoints = new List<SKPoint>();
             var donePoints = new List<SKPoint[]>();
             SKPath streetPath = new SKPath();
-            SKPath scorePath = new SKPath(); 
+            SKPath scorePath = new SKPath();
+            SKPath collectedPath = new SKPath();
             SKPaint streetStroke = new SKPaint
             {
                 Style = SKPaintStyle.Stroke,
@@ -67,13 +69,20 @@ namespace Candymap
                 StrokeJoin = SKStrokeJoin.Miter
             };
 
+            SKPaint collectedStroke = new SKPaint
+            {
+                Style = SKPaintStyle.Stroke,
+                Color = SKColors.Blue,
+                StrokeWidth = 5,
+                IsAntialias = true,
+                StrokeCap = SKStrokeCap.Round,
+                StrokeJoin = SKStrokeJoin.Miter
+            };
 
             void buttonCreater(int iteration)
             {
-
                 var xyPoint = new List<SKPoint>();
-
-
+                
                 for (var i = 0; i < numButtonsInPattern; i++)
                 {
 
@@ -170,7 +179,6 @@ namespace Candymap
                 {
                     if (!donePoints.Contains(elem))
                     {
-                        ;
                         //skCanvas.DrawLine(elem[0].X, elem[0].Y, elem[1].X, elem[1].Y, strokePaint);
 
                         if ((elem[1].Y - elem[0].Y) > 0 && (elem[1].X - elem[0].X) > 0 && !firstDone)
@@ -184,7 +192,16 @@ namespace Candymap
 
                             scorePath.MoveTo(elem[0]);
                             scorePath.ArcTo(new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, elem[1]);
+
                             firstDone = true;
+
+                            if (traversedScore < currentScore)
+                            {
+                                collectedPath.MoveTo(elem[0]);
+                                collectedPath.ArcTo(new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, elem[1]);
+
+                                traversedScore += 1000;
+                            }
                         }
                         else if ((elem[1].Y - elem[0].Y) > 0 && (elem[1].X - elem[0].X) > 0 && firstDone)
                         {  //2 -> 3
@@ -199,6 +216,14 @@ namespace Candymap
                             scorePath.ArcTo(new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.Clockwise, elem[1]);
 
                             firstDone = false;
+
+                            if (traversedScore < currentScore)
+                            {
+                                collectedPath.MoveTo(elem[0]);
+                                collectedPath.ArcTo(new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.Clockwise, elem[1]);
+
+                                traversedScore += 1000;
+                            }
                         }
                         if ((elem[1].Y - elem[0].Y) < 0 && (elem[1].X - elem[0].X) > 0)
                         {  //1 -> 2
@@ -223,6 +248,17 @@ namespace Candymap
 
                             scorePath.MoveTo(midlinemidpoint);
                             scorePath.ArcTo(new SKPoint(70, 70), 55, SKPathArcSize.Small, SKPathDirection.Clockwise,  elem[1]);
+
+                            if (traversedScore < currentScore)
+                            {
+                                collectedPath.MoveTo(elem[0]);
+                                collectedPath.ArcTo(new SKPoint(70, 70), 55, SKPathArcSize.Small, SKPathDirection.CounterClockwise, midlinemidpoint);
+
+                                collectedPath.MoveTo(midlinemidpoint);
+                                collectedPath.ArcTo(new SKPoint(70, 70), 55, SKPathArcSize.Small, SKPathDirection.Clockwise, elem[1]);
+
+                                traversedScore += 1000;
+                            }
                         }
 
                         if ((elem[1].Y - elem[0].Y) > 0 && (elem[1].X - elem[0].X) < 0)
@@ -236,6 +272,14 @@ namespace Candymap
 
                             scorePath.MoveTo(elem[0]);
                             scorePath.ArcTo(new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.Clockwise, elem[1]);
+
+                            if (traversedScore < currentScore)
+                            {
+                                collectedPath.MoveTo(elem[0]);
+                                collectedPath.ArcTo(new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.Clockwise, elem[1]);
+                                
+                                traversedScore += 1000;
+                            }
 
                         }
                         if ((elem[1].Y - elem[0].Y) < 0 && (elem[1].X - elem[0].X) < 0)
@@ -262,6 +306,18 @@ namespace Candymap
 
                             scorePath.MoveTo(midlinemidpoint);
                             scorePath.ArcTo(new SKPoint(70, 70), 55, SKPathArcSize.Small, SKPathDirection.CounterClockwise, elem[1]);
+
+                            if (traversedScore < currentScore)
+                            {
+                                collectedPath.MoveTo(elem[0]);
+                                collectedPath.ArcTo(new SKPoint(70, 70), 55, SKPathArcSize.Small, SKPathDirection.Clockwise, midlinemidpoint);
+
+                                collectedPath.MoveTo(midlinemidpoint);
+                                collectedPath.ArcTo(new SKPoint(70, 70), 55, SKPathArcSize.Small, SKPathDirection.CounterClockwise, elem[1]);
+                                
+                                traversedScore += 1000;
+                            }
+                            
                         }
                         donePoints.Add(elem);
                     }
@@ -271,7 +327,8 @@ namespace Candymap
                 {
                     for (var i = 0; i < lastPoints.Count; i++)
                     {
-                        if (!donePoints.Contains(new SKPoint[] { new SKPoint(lastPoints[i].X, lastPoints[i].Y), new SKPoint(firstPoints[i + 1].X, firstPoints[i + 1].Y) }))
+                        var thisLine = new SKPoint[] { new SKPoint(lastPoints[i].X, lastPoints[i].Y), new SKPoint(firstPoints[i + 1].X, firstPoints[i + 1].Y) };
+                        if (!donePoints.Contains(thisLine))
                         {
                             /*skLineList.Add(new SKPoint[] {
                                 lastPoints[i],firstPoints[i+1]
@@ -287,29 +344,41 @@ namespace Candymap
                             scorePath.MoveTo(lastPoints[i]);
                             scorePath.ArcTo(new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, firstPoints[i + 1]);
 
-                            donePoints.Add(new SKPoint[] { new SKPoint(lastPoints[i].X, lastPoints[i].Y), new SKPoint(firstPoints[i + 1].X, firstPoints[i + 1].Y) });
+                            if (traversedScore < currentScore)
+                            {
+                                collectedPath.MoveTo(lastPoints[i]);
+                                collectedPath.ArcTo(new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, firstPoints[i + 1]);
+
+                                traversedScore += 1000;
+                            }
+                            donePoints.Add(thisLine);
                         }
                         else { Console.WriteLine("herehere"); }             ///TODO:  Control not reaching here, all 5->6 lines are redrawn 
 
                     }
                 }
-                catch { }
+                catch(Exception e) { Console.WriteLine(e.ToString()); }
 
-                /*foreach(var p in scorePath.GetPoints(max:20))
+                
+
+                /*using (SKPath.RawIterator iterator = scorePath.CreateRawIterator())
+                {
+                    SKPoint[] points = new SKPoint[8];
+                    SKPoint last = new SKPoint(30,30);
+                    while (iterator.Next(points) != SKPathVerb.Done)
                     {
-                        var scoreBox = new BoxView { WidthRequest=5,HeightRequest=5,Color=Color.Red };
-                        var x = p.X;
-                        var y = p.Y;
-                        //var y = currentButtonIndex * heightScale + rnd.Next(-randomnessFactor/2, +randomnessFactor);
-                        AbsoluteLayout.SetLayoutBounds(scoreBox, new Rectangle(x, y, 5, 5));
-                        AbsoluteLayout.SetLayoutFlags(scoreBox, AbsoluteLayoutFlags.None);
-                        ScoreLayout.Children.Add(scoreBox);
-                    }*/
-
-
-
+                        
+                        //scorePath.MoveTo(points[0]);
+                            //SKPoint[] linePoints = new SKPoint[] { points[0], points[3] };
+                        Console.WriteLine("heyheyhey" + points[0].ToString());
+                        skCanvas.DrawLine(points[0], last, streetStroke);
+                        last = points[0];
+                    }
+                }*/
+                
                 skCanvas.DrawPath(scorePath, scoreStroke);
                 skCanvas.DrawPath(streetPath, streetStroke);
+                skCanvas.DrawPath(collectedPath, collectedStroke);
             }
 
 
