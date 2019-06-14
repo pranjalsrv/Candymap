@@ -1,19 +1,14 @@
-﻿using System;
+﻿using SkiaSharp;
+using SkiaSharp.Views.Forms;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xamarin.Forms;
-using SkiaSharp;
-using SkiaSharp.Views.Forms;
-using System.Reflection;
 
 namespace Candymap
 {
-
     public partial class MainPage : ContentPage
     {
-
         public MainPage()
         {
 
@@ -26,7 +21,9 @@ namespace Candymap
             int buttonHeight = 60;
             //int randomnessFactor = 50;
             var curlinessFactor = 30;                       //Change if changing widgetWidth          30----60
-            float currentScore = 8000;
+            float currentScore = 27000;
+            float segmentScore = 1250;
+
 
             int heightScale = widgetWidth / numButtonsInPattern;
             int scrollThreshold = heightScale * numButtonsInPattern / 4;
@@ -42,13 +39,15 @@ namespace Candymap
             double screenHeight = size.Height;
             float traversedScore = 0.0f;
             int TotalIterations = 0;
+            bool clipLock = false;
             var lastPoints = new List<SKPoint>();
             var firstPoints = new List<SKPoint>();
             var scorePoints = new List<SKPoint>();
-            var donePoints = new List<SKPoint[]>();
+            
             SKPath streetPath = new SKPath();
             SKPath scorePath = new SKPath();
             SKPath collectedPath = new SKPath();
+            SKPath clipperPath = new SKPath();
             SKPaint streetStroke = new SKPaint
             {
                 Style = SKPaintStyle.Stroke,
@@ -79,13 +78,22 @@ namespace Candymap
                 StrokeJoin = SKStrokeJoin.Miter
             };
 
+            SKPaint clipStroke = new SKPaint
+            {
+                Style = SKPaintStyle.Stroke,
+                Color = SKColors.Green,
+                StrokeWidth = 5,
+                IsAntialias = true,
+                StrokeCap = SKStrokeCap.Round,
+                StrokeJoin = SKStrokeJoin.Miter
+            };
+
             void buttonCreater(int iteration)
             {
                 var xyPoint = new List<SKPoint>();
-                
+
                 for (var i = 0; i < numButtonsInPattern; i++)
                 {
-
                     int indexForButtonText = buttons.Count - 1;
                     //if (indexForButtonText == 241) { color = Color.Green; }
                     //else { color = Color.Default; }
@@ -170,11 +178,23 @@ namespace Candymap
 
             void Draw_RandomShape(SKCanvas skCanvas, int curveNumber)
             {
-
+                var donePoints = new List<SKPoint[]>();
                 skLineList = skLineList.Distinct().ToList();
                 bool firstDone = false;
+                //bool secondDone = false;
+                int senderIndex = 1;
 
+                /*for (var i = 1; i < lastPoints.Count; i++)
+                {
+                    var thisLine = new SKPoint[] { new SKPoint(lastPoints[i - 1].X, lastPoints[i - 1].Y), new SKPoint(firstPoints[i].X, firstPoints[i].Y) };
+                    //Adding 5->6 to skLineList
+                    if (!donePoints.Contains(thisLine))
+                    {
+                        skLineList.Add(thisLine);
+                    }
+                }*/
 
+                skLineList = skLineList.Distinct().ToList();
                 foreach (var elem in skLineList)
                 {
                     if (!donePoints.Contains(elem))
@@ -195,13 +215,23 @@ namespace Candymap
 
                             firstDone = true;
 
-                            if (traversedScore < currentScore)
+                            if (traversedScore <= currentScore)
                             {
                                 collectedPath.MoveTo(elem[0]);
                                 collectedPath.ArcTo(new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, elem[1]);
 
-                                traversedScore += 1000;
+                                traversedScore += segmentScore;
+                                if (clipLock)
+                                {
+                                    pathClipper(elem[0], elem[1], new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, (currentScore - traversedScore));
+
+                                }
+                                if (traversedScore + segmentScore > currentScore && !clipLock)
+                                {
+                                    clipLock = true;
+                                }
                             }
+                            
                         }
                         else if ((elem[1].Y - elem[0].Y) > 0 && (elem[1].X - elem[0].X) > 0 && firstDone)
                         {  //2 -> 3
@@ -217,14 +247,25 @@ namespace Candymap
 
                             firstDone = false;
 
-                            if (traversedScore < currentScore)
+                            if (traversedScore <= currentScore )
                             {
                                 collectedPath.MoveTo(elem[0]);
                                 collectedPath.ArcTo(new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.Clockwise, elem[1]);
 
-                                traversedScore += 1000;
+                                traversedScore += segmentScore;
+                                if (clipLock)
+                                {
+                                    pathClipper(elem[0], elem[1], new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.Clockwise, currentScore - traversedScore);
+                                    
+                                }
+                                if (traversedScore + segmentScore > currentScore && !clipLock)
+                                {
+                                    clipLock = true;
+                                }
                             }
+                            
                         }
+
                         if ((elem[1].Y - elem[0].Y) < 0 && (elem[1].X - elem[0].X) > 0)
                         {  //1 -> 2
                             var firstLineElem = new SKPoint[] { new SKPoint(elem[0].X, elem[0].Y - 5), new SKPoint(elem[1].X, elem[1].Y - 5) };
@@ -247,21 +288,43 @@ namespace Candymap
                             streetPath.ArcTo(new SKPoint(70, 70), 55, SKPathArcSize.Small, SKPathDirection.Clockwise, secondLineElem[1]);
 
                             scorePath.MoveTo(midlinemidpoint);
-                            scorePath.ArcTo(new SKPoint(70, 70), 55, SKPathArcSize.Small, SKPathDirection.Clockwise,  elem[1]);
+                            scorePath.ArcTo(new SKPoint(70, 70), 55, SKPathArcSize.Small, SKPathDirection.Clockwise, elem[1]);
 
-                            if (traversedScore < currentScore)
+                            if (traversedScore <= currentScore)
                             {
                                 collectedPath.MoveTo(elem[0]);
                                 collectedPath.ArcTo(new SKPoint(70, 70), 55, SKPathArcSize.Small, SKPathDirection.CounterClockwise, midlinemidpoint);
-
+                                
+                                traversedScore += segmentScore;
+                                if (clipLock)
+                                {
+                                    pathClipper(elem[0], midlinemidpoint, new SKPoint(70, 70), 55, SKPathArcSize.Small, SKPathDirection.CounterClockwise, currentScore - traversedScore);                          
+                                }
+                                if (traversedScore + segmentScore > currentScore && !clipLock)
+                                {
+                                     clipLock = true;
+                                }
+                            }
+                            if (traversedScore <= currentScore)
+                            {
                                 collectedPath.MoveTo(midlinemidpoint);
                                 collectedPath.ArcTo(new SKPoint(70, 70), 55, SKPathArcSize.Small, SKPathDirection.Clockwise, elem[1]);
 
-                                traversedScore += 1000;
+                                traversedScore += segmentScore;
+                                if (clipLock)
+                                {
+                                    pathClipper(midlinemidpoint, elem[1], new SKPoint(70, 70), 55, SKPathArcSize.Small, SKPathDirection.Clockwise, currentScore - traversedScore);
+                                }
+                                if (traversedScore + segmentScore > currentScore && !clipLock)
+                                {
+                                    clipLock = true;
+                                }
                             }
+                                
                         }
-
-                        if ((elem[1].Y - elem[0].Y) > 0 && (elem[1].X - elem[0].X) < 0)
+                        
+                        
+                        if ((elem[1].Y - elem[0].Y) > 0 && (elem[1].X - elem[0].X) < 0 )
                         {  //3 -> 4
                             var firstLineElem = new SKPoint[] { new SKPoint(elem[0].X - 5, elem[0].Y), new SKPoint(elem[1].X, elem[1].Y - 5) };
                             var secondLineElem = new SKPoint[] { new SKPoint(elem[0].X + 5, elem[0].Y), new SKPoint(elem[1].X, elem[1].Y + 5) };
@@ -273,15 +336,49 @@ namespace Candymap
                             scorePath.MoveTo(elem[0]);
                             scorePath.ArcTo(new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.Clockwise, elem[1]);
 
-                            if (traversedScore < currentScore)
+                            //secondDone = true;
+
+                            if (traversedScore <= currentScore)
                             {
                                 collectedPath.MoveTo(elem[0]);
                                 collectedPath.ArcTo(new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.Clockwise, elem[1]);
-                                
+
+                                traversedScore += segmentScore;
+
+                                if (clipLock)
+                                {
+                                    pathClipper(elem[0], elem[1], new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.Clockwise, currentScore - traversedScore);
+                                }
+
+                                if (traversedScore + segmentScore > currentScore && !clipLock)
+                                {
+                                    clipLock = true;
+                                }
+                            }
+                        }
+
+                        /*if ((elem[1].Y - elem[0].Y) > 0 && (elem[1].X - elem[0].X) < 0)
+                        {
+                            Console.WriteLine("reached");
+                            //5->6
+                            var firstLineElem = new SKPoint[] { new SKPoint(elem[0].X, elem[0].Y - 5), new SKPoint(elem[1].X - 5, elem[1].Y) };
+                            var secondLineElem = new SKPoint[] { new SKPoint(elem[0].X, elem[0].Y + 5), new SKPoint(elem[1].X + 5, elem[1].Y) };
+                            streetPath.MoveTo(firstLineElem[0]);
+                            streetPath.ArcTo(new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, firstLineElem[1]);
+                            streetPath.MoveTo(secondLineElem[0]);
+                            streetPath.ArcTo(new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, secondLineElem[1]);
+
+                            scorePath.MoveTo(elem[0]);
+                            scorePath.ArcTo(new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise,elem[1]);
+                            if (traversedScore < currentScore)
+                            {
+                                collectedPath.MoveTo(elem[0]);
+                                collectedPath.ArcTo(new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise,elem[1]);
                                 traversedScore += 1000;
                             }
+                            secondDone = false;
+                        }*/
 
-                        }
                         if ((elem[1].Y - elem[0].Y) < 0 && (elem[1].X - elem[0].X) < 0)
                         {  //4 -> 5
 
@@ -289,7 +386,7 @@ namespace Candymap
                             var secondLineElem = new SKPoint[] { new SKPoint(elem[0].X, elem[0].Y + 5), new SKPoint(elem[1].X, elem[1].Y + 5) };
                             var midpoint1 = new SKPoint((firstLineElem[0].X + firstLineElem[1].X) / 2, ((firstLineElem[0].Y + firstLineElem[1].Y) / 2));
                             var midpoint2 = new SKPoint((secondLineElem[0].X + secondLineElem[1].X) / 2, ((secondLineElem[0].Y + secondLineElem[1].Y) / 2));
-                            var midlinemidpoint = new SKPoint((elem[0].X+elem[1].X)/2, (elem[0].Y + elem[1].Y) / 2);
+                            var midlinemidpoint = new SKPoint((elem[0].X + elem[1].X) / 2, (elem[0].Y + elem[1].Y) / 2);
 
                             streetPath.MoveTo(firstLineElem[0]);
                             streetPath.ArcTo(new SKPoint(70, 70), 55, SKPathArcSize.Small, SKPathDirection.Clockwise, midpoint1);
@@ -307,59 +404,146 @@ namespace Candymap
                             scorePath.MoveTo(midlinemidpoint);
                             scorePath.ArcTo(new SKPoint(70, 70), 55, SKPathArcSize.Small, SKPathDirection.CounterClockwise, elem[1]);
 
-                            if (traversedScore < currentScore)
+                            if (traversedScore <= currentScore)
                             {
                                 collectedPath.MoveTo(elem[0]);
                                 collectedPath.ArcTo(new SKPoint(70, 70), 55, SKPathArcSize.Small, SKPathDirection.Clockwise, midlinemidpoint);
+                                
+                                traversedScore += segmentScore;
+                                if (clipLock)
+                                {
+                                    pathClipper(elem[0], midlinemidpoint, new SKPoint(70, 70), 55, SKPathArcSize.Small, SKPathDirection.Clockwise, currentScore - traversedScore);
 
+                                }
+                                if (traversedScore + segmentScore > currentScore && !clipLock)
+                                {
+                                    clipLock = true;
+                                }
+                            }
+                            if (traversedScore <= currentScore)
+                            {
                                 collectedPath.MoveTo(midlinemidpoint);
                                 collectedPath.ArcTo(new SKPoint(70, 70), 55, SKPathArcSize.Small, SKPathDirection.CounterClockwise, elem[1]);
-                                
-                                traversedScore += 1000;
+
+                                traversedScore += segmentScore;
+                                if (clipLock)
+                                {
+                                    pathClipper(midlinemidpoint, elem[1], new SKPoint(70, 70), 55, SKPathArcSize.Small, SKPathDirection.CounterClockwise, currentScore - traversedScore);
+
+                                }
+                                if (traversedScore + segmentScore > currentScore && !clipLock)
+                                {
+                                    clipLock = true;
+                                }
                             }
-                            
+                            try
+                            {
+                                fivetosix(senderIndex);
+                                senderIndex++;
+                            }
+                            catch { }
                         }
                         donePoints.Add(elem);
                     }
+                    donePoints.Add(elem);
                 }
 
-                try
-                {
-                    for (var i = 0; i < lastPoints.Count; i++)
+                void fivetosix(int index) {
+                    var thisLine = new SKPoint[] { new SKPoint(lastPoints[index - 1].X, lastPoints[index - 1].Y), new SKPoint(firstPoints[index].X, firstPoints[index].Y) };
+                    if (!donePoints.Contains(thisLine))
                     {
-                        var thisLine = new SKPoint[] { new SKPoint(lastPoints[i].X, lastPoints[i].Y), new SKPoint(firstPoints[i + 1].X, firstPoints[i + 1].Y) };
-                        if (!donePoints.Contains(thisLine))
+                        var firstLineElem = new SKPoint[] { new SKPoint(lastPoints[index - 1].X, lastPoints[index - 1].Y - 5), new SKPoint(firstPoints[index].X - 5, firstPoints[index].Y) };
+                        var secondLineElem = new SKPoint[] { new SKPoint(lastPoints[index - 1].X, lastPoints[index - 1].Y + 5), new SKPoint(firstPoints[index].X + 5, firstPoints[index].Y) };
+                        //5->6
+                        streetPath.MoveTo(firstLineElem[0]);
+                        streetPath.ArcTo(new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, firstLineElem[1]);
+                        streetPath.MoveTo(secondLineElem[0]);
+                        streetPath.ArcTo(new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, secondLineElem[1]);
+
+                        scorePath.MoveTo(thisLine[0]);
+                        scorePath.ArcTo(new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise,thisLine[1]);
+                        if (traversedScore <= currentScore)
+                        {
+                            collectedPath.MoveTo(thisLine[0]);
+                            collectedPath.ArcTo(new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, thisLine[1]);
+                            traversedScore += segmentScore;
+                            if (clipLock)
+                            {
+                                pathClipper(thisLine[0], thisLine[1], new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, currentScore - traversedScore);
+
+                            }
+                            if (traversedScore + segmentScore > currentScore && !clipLock)
+                            {
+                                clipLock = true;
+                            }
+                        }
+                        donePoints.Add(thisLine);
+                    }
+                }
+
+                void pathClipper(SKPoint point1, SKPoint point2, SKPoint radii, int angle, SKPathArcSize arcSize, SKPathDirection pathDirection, float clipLength) {
+
+                    float onlyLength = segmentScore+ clipLength;
+
+                    if (onlyLength == segmentScore)
+                    {
+                        clipperPath.MoveTo(point1);
+                        clipperPath.ArcTo(radii, angle, arcSize, pathDirection, point2);
+                    }
+                    else
+                    {
+                        clipperPath.MoveTo(point1);
+                        clipperPath.ArcTo(radii, angle, arcSize, pathDirection, point2);
+                        var clipPathPoints = clipperPath.GetPoints(max: 4);
+                        clipperPath.Reset();
+
+
+                        for (var i = 0; i < clipPathPoints.Count()-2; i++)
+                        {
+                            clipperPath.MoveTo(clipPathPoints[i]);
+                            clipperPath.LineTo(clipPathPoints[i+1]);
+                        }
+
+                        Console.WriteLine("heyheyhey" + onlyLength.ToString());
+                    }
+                }
+                /*try
+                index
+                    for (var i = 1; i < lastPoints.Count; i++)
+                    {
+                        //var thisLine = new SKPoint[] { new SKPoint(lastPoints[i].X, lastPoints[i].Y), new SKPoint(firstPoints[i + 1].X, firstPoints[i + 1].Y) };
+                        if (!donePoints.Contains(new SKPoint[] { new SKPoint(lastPoints[i - 1].X, lastPoints[i - 1].Y), new SKPoint(firstPoints[i].X, firstPoints[i].Y) }))
                         {
                             /*skLineList.Add(new SKPoint[] {
                                 lastPoints[i],firstPoints[i+1]
-                            });*/
-                            var firstLineElem = new SKPoint[] { new SKPoint(lastPoints[i].X, lastPoints[i].Y - 5), new SKPoint(firstPoints[i + 1].X - 5, firstPoints[i + 1].Y) };
-                            var secondLineElem = new SKPoint[] { new SKPoint(lastPoints[i].X, lastPoints[i].Y + 5), new SKPoint(firstPoints[i + 1].X + 5, firstPoints[i + 1].Y) };
+                            });
+                            var firstLineElem = new SKPoint[] { new SKPoint(lastPoints[i - 1].X, lastPoints[i - 1].Y - 5), new SKPoint(firstPoints[i].X - 5, firstPoints[i].Y) };
+                            var secondLineElem = new SKPoint[] { new SKPoint(lastPoints[i - 1].X, lastPoints[i - 1].Y + 5), new SKPoint(firstPoints[i].X + 5, firstPoints[i].Y) };
                             //5->6
                             streetPath.MoveTo(firstLineElem[0]);
                             streetPath.ArcTo(new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, firstLineElem[1]);
                             streetPath.MoveTo(secondLineElem[0]);
                             streetPath.ArcTo(new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, secondLineElem[1]);
 
-                            scorePath.MoveTo(lastPoints[i]);
-                            scorePath.ArcTo(new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, firstPoints[i + 1]);
-
-                            if (traversedScore < currentScore)
+                            scorePath.MoveTo(new SKPoint(lastPoints[i - 1].X, lastPoints[i - 1].Y));
+                            scorePath.ArcTo(new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, new SKPoint(firstPoints[i].X, firstPoints[i].Y));
+                            if (traversedScore < currentScore && !collectionLock)
                             {
-                                collectedPath.MoveTo(lastPoints[i]);
-                                collectedPath.ArcTo(new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, firstPoints[i + 1]);
-
+                                collectedPath.MoveTo(new SKPoint(lastPoints[i - 1].X, lastPoints[i - 1].Y));
+                                collectedPath.ArcTo(new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, new SKPoint(firstPoints[i].X, firstPoints[i].Y));
                                 traversedScore += 1000;
+                                collectionLock = true;
                             }
-                            donePoints.Add(thisLine);
+
+                            donePoints.Add(new SKPoint[] { new SKPoint(lastPoints[i - 1].X, lastPoints[i - 1].Y), new SKPoint(firstPoints[i].X, firstPoints[i].Y) });
                         }
                         else { Console.WriteLine("herehere"); }             ///TODO:  Control not reaching here, all 5->6 lines are redrawn 
 
                     }
                 }
-                catch(Exception e) { Console.WriteLine(e.ToString()); }
+                catch (Exception e) { Console.WriteLine(e.ToString()); }*/
 
-                
+
 
                 /*using (SKPath.RawIterator iterator = scorePath.CreateRawIterator())
                 {
@@ -375,10 +559,11 @@ namespace Candymap
                         last = points[0];
                     }
                 }*/
-                
+
                 skCanvas.DrawPath(scorePath, scoreStroke);
                 skCanvas.DrawPath(streetPath, streetStroke);
                 skCanvas.DrawPath(collectedPath, collectedStroke);
+                skCanvas.DrawPath(clipperPath, clipStroke);
             }
 
 
