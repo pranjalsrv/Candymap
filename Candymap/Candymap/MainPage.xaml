@@ -7,8 +7,10 @@
              BackgroundColor="White">
 
     <ScrollView  x:Name="MainScrollView">
-        <AbsoluteLayout>
+        <AbsoluteLayout HorizontalOptions="CenterAndExpand">
+            <skia:SKCanvasView x:Name="SkCanvasView2" AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="SizeProportional" HorizontalOptions="Start"/>
             <skia:SKCanvasView x:Name="SkCanvasView" AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="SizeProportional" HorizontalOptions="Start"/>
+            
             <AbsoluteLayout x:Name="MainAbsoluteLayout" AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="SizeProportional" HorizontalOptions="Start">
             </AbsoluteLayout>
         </AbsoluteLayout>
