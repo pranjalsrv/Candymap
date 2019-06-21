@@ -22,7 +22,7 @@ namespace Candymap
             int smallButtonWidth = 30;
             //int randomnessFactor = 50;
             var curlinessFactor = 60;                       //Change if changing widgetWidth          30----60
-            float currentScore = 10000;
+            float currentScore =10000;
             float segmentScore = 1000;
 
 
@@ -100,17 +100,19 @@ namespace Candymap
                     //if (indexForButtonText == 241) { color = Color.Green; }
                     //else { color = Color.Default; }
 
-                    if (i % 6 != 0)
+                    if (i % 2 != 0)
                     {
                         buttons.Add(new Button
                         {
-                            Text = (indexForButtonText + 1).ToString(),
+                            //Text = (indexForButtonText + 1).ToString(),
                             WidthRequest = smallButtonWidth,
                             HeightRequest = smallButtonHeight,
                             CornerRadius = smallButtonWidth/2,
-                            BackgroundColor = Color.Yellow,
+                            BackgroundColor = Color.Transparent,
                             HorizontalOptions= LayoutOptions.Center,
-                            VerticalOptions= LayoutOptions.Center
+                            VerticalOptions= LayoutOptions.Center,
+                            RotationX=180,
+                            RotationY=180
                         });
                     }
                     else
@@ -121,7 +123,9 @@ namespace Candymap
                             WidthRequest = buttonWidth,
                             HeightRequest = buttonHeight,
                             CornerRadius = buttonWidth/2,
-                            BackgroundColor = Color.Green
+                            BackgroundColor = Color.Green,
+                            RotationX=180,
+                            RotationY=180
                         });
                     }
 
@@ -137,7 +141,7 @@ namespace Candymap
                     if (i < numButtonsInPattern / 2.0f)
                     {
                         var x = 0 + placementIndex * (2.0 / (numButtonsInPattern));
-                        var y = 600-(currentButtonIndex * heightScale + Math.Sin((i / (numButtonsInPattern / 8.0f)) * Math.PI / 2) * curlinessFactor +10);
+                        var y = currentButtonIndex * heightScale + Math.Sin((i / (numButtonsInPattern / 8.0f)) * Math.PI / 2) * curlinessFactor +10;
                         //var y = currentButtonIndex * heightScale + rnd.Next(-randomnessFactor, +randomnessFactor/2);
                         AbsoluteLayout.SetLayoutBounds(buttons[currentButtonIndex], new Rectangle(x, y, buttons[currentButtonIndex].Width, buttons[currentButtonIndex].Height));
                         AbsoluteLayout.SetLayoutFlags(buttons[currentButtonIndex], AbsoluteLayoutFlags.XProportional);
@@ -148,7 +152,7 @@ namespace Candymap
                     else if (i == numButtonsInPattern / 2.0f)
                     {
                         var x = 2 - placementIndex * (2.0 / (numButtonsInPattern));
-                        var y = 600-(currentButtonIndex * heightScale + 10);
+                        var y = currentButtonIndex * heightScale + 10;
                         //var y = currentButtonIndex * heightScale + rnd.Next(-randomnessFactor/2, +randomnessFactor);
                         AbsoluteLayout.SetLayoutBounds(buttons[currentButtonIndex], new Rectangle(x, y, buttons[currentButtonIndex].Width, buttons[currentButtonIndex].Height));
                         AbsoluteLayout.SetLayoutFlags(buttons[currentButtonIndex], AbsoluteLayoutFlags.XProportional);
@@ -159,7 +163,7 @@ namespace Candymap
                     else
                     {
                         var x = 2 - placementIndex * (2.0 / (numButtonsInPattern));
-                        var y = 600-(currentButtonIndex * heightScale + Math.Sin((i / (numButtonsInPattern / 8.0f)) * Math.PI / 2) * curlinessFactor + 10);
+                        var y = currentButtonIndex * heightScale + Math.Sin((i / (numButtonsInPattern / 8.0f)) * Math.PI / 2) * curlinessFactor + 10;
                         //var y = currentButtonIndex * heightScale + rnd.Next(-randomnessFactor/2, +randomnessFactor);
                         AbsoluteLayout.SetLayoutBounds(buttons[currentButtonIndex], new Rectangle(x, y, buttons[currentButtonIndex].Width, buttons[currentButtonIndex].Height));
                         AbsoluteLayout.SetLayoutFlags(buttons[currentButtonIndex], AbsoluteLayoutFlags.XProportional);
@@ -254,21 +258,21 @@ namespace Candymap
                             scorePath.ArcTo(new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, elem[1]);
 
                             firstDone = true;
+                            traversedScore += segmentScore;
 
                             if (traversedScore <= currentScore)
                             {
                                 collectedPath.MoveTo(elem[0]);
                                 collectedPath.ArcTo(new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, elem[1]);
                                 Console.WriteLine(traversedScore+"0-1");
-                                traversedScore += segmentScore;
-                                if (clipLock)
+                                /*if (clipLock)
                                 {
                                     pathClipper(elem[0], elem[1], new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, (currentScore - traversedScore));
                                 }
                                 if (traversedScore + segmentScore >= currentScore && !clipLock)
                                 {
                                     clipLock = true;
-                                }
+                                }*/
                             }
                             
                         }
@@ -285,21 +289,21 @@ namespace Candymap
                             scorePath.ArcTo(new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.Clockwise, elem[1]);
 
                             firstDone = false;
+                            traversedScore += segmentScore;
 
                             if (traversedScore <= currentScore )
                             {
                                 collectedPath.MoveTo(elem[0]);
                                 collectedPath.ArcTo(new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.Clockwise, elem[1]);
                                 Console.WriteLine(traversedScore + "2-3");
-                                traversedScore += segmentScore;
-                                if (clipLock)
+                                /*if (clipLock)
                                 {
                                     pathClipper(elem[0], elem[1], new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.Clockwise, currentScore - traversedScore);
                                 }
                                 if (traversedScore + segmentScore >= currentScore && !clipLock)
                                 {
                                     clipLock = true;
-                                }
+                                }*/
                             }
                         }
 
@@ -326,23 +330,27 @@ namespace Candymap
 
                             scorePath.MoveTo(midlinemidpoint);
                             scorePath.ArcTo(new SKPoint(70, 70), 55, SKPathArcSize.Small, SKPathDirection.Clockwise, elem[1]);
+                            traversedScore += segmentScore;
 
                             if (traversedScore <= currentScore)
                             {
                                 collectedPath.MoveTo(elem[0]);
                                 collectedPath.ArcTo(new SKPoint(70, 70), 55, SKPathArcSize.Small, SKPathDirection.CounterClockwise, midlinemidpoint);
+                                collectedPath.MoveTo(midlinemidpoint);
+                                collectedPath.ArcTo(new SKPoint(70, 70), 55, SKPathArcSize.Small, SKPathDirection.Clockwise, elem[1]);
                                 Console.WriteLine(traversedScore + "1-2 1");
-                                traversedScore += segmentScore/2;
-                                if (clipLock)
+                                /*if (clipLock)
                                 {
-                                    pathClipper(elem[0], midlinemidpoint, new SKPoint(70, 70), 55, SKPathArcSize.Small, SKPathDirection.CounterClockwise, currentScore - traversedScore);                          
+                                    pathClipper(elem[0], midlinemidpoint, new SKPoint(70, 70), 55, SKPathArcSize.Small, SKPathDirection.CounterClockwise, currentScore - traversedScore);
+                                    pathClipper(midlinemidpoint, elem[1], new SKPoint(70, 70), 55, SKPathArcSize.Small, SKPathDirection.Clockwise, currentScore - traversedScore);
+
                                 }
-                                if (traversedScore + segmentScore/2 >= currentScore && !clipLock)
+                                if (traversedScore + segmentScore >= currentScore && !clipLock)
                                 {
                                     clipLock = true;
-                                }
+                                }*/
                             }
-                            if (traversedScore <= currentScore)
+                            /*if (traversedScore <= currentScore)
                             {
                                 collectedPath.MoveTo(midlinemidpoint);
                                 collectedPath.ArcTo(new SKPoint(70, 70), 55, SKPathArcSize.Small, SKPathDirection.Clockwise, elem[1]);
@@ -356,7 +364,7 @@ namespace Candymap
                                 {
                                     clipLock = true;
                                 }
-                            }
+                            }*/
                                 
                         }
                         
@@ -374,15 +382,15 @@ namespace Candymap
                             scorePath.ArcTo(new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.Clockwise, elem[1]);
 
                             //secondDone = true;
+                            traversedScore += segmentScore;
 
                             if (traversedScore <= currentScore)
                             {
                                 collectedPath.MoveTo(elem[0]);
                                 collectedPath.ArcTo(new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.Clockwise, elem[1]);
                                 Console.WriteLine(traversedScore + "3-4");
-                                traversedScore += segmentScore;
 
-                                if (clipLock)
+                                /*if (clipLock)
                                 {
                                     pathClipper(elem[0], elem[1], new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.Clockwise, currentScore - traversedScore);
                                 }
@@ -390,7 +398,7 @@ namespace Candymap
                                 if (traversedScore + segmentScore >= currentScore && !clipLock)
                                 {
                                     clipLock = true;
-                                }
+                                }*/
                             }
                         }
 
@@ -440,37 +448,27 @@ namespace Candymap
 
                             scorePath.MoveTo(midlinemidpoint);
                             scorePath.ArcTo(new SKPoint(70, 70), 55, SKPathArcSize.Small, SKPathDirection.CounterClockwise, elem[1]);
-                  
+                            traversedScore += segmentScore;
+
                             if (traversedScore <= currentScore)
                             {
                                 collectedPath.MoveTo(elem[0]);
                                 collectedPath.ArcTo(new SKPoint(70, 70), 55, SKPathArcSize.Small, SKPathDirection.Clockwise, midlinemidpoint);
-                                Console.WriteLine(traversedScore + "4-5 1");
-                                traversedScore += segmentScore/2;
-                                if (clipLock)
-                                {
-                                    pathClipper(elem[0], midlinemidpoint, new SKPoint(70, 70), 55, SKPathArcSize.Small, SKPathDirection.Clockwise, currentScore - traversedScore);
-                                }
-                                if (traversedScore + segmentScore/2 >= currentScore && !clipLock)
-                                {
-                                    clipLock = true;
-                                }
-                            }
-                            if (traversedScore <= currentScore)
-                            {
                                 collectedPath.MoveTo(midlinemidpoint);
                                 collectedPath.ArcTo(new SKPoint(70, 70), 55, SKPathArcSize.Small, SKPathDirection.CounterClockwise, elem[1]);
-                                Console.WriteLine(traversedScore + "4-5 2");
-                                traversedScore += segmentScore/2;
-                                if (clipLock)
+                                Console.WriteLine(traversedScore + "4-5 1");
+                                /*if (clipLock)
                                 {
+                                    pathClipper(elem[0], midlinemidpoint, new SKPoint(70, 70), 55, SKPathArcSize.Small, SKPathDirection.Clockwise, currentScore - traversedScore);
                                     pathClipper(midlinemidpoint, elem[1], new SKPoint(70, 70), 55, SKPathArcSize.Small, SKPathDirection.CounterClockwise, currentScore - traversedScore);
+
                                 }
-                                if (traversedScore + segmentScore/2 >= currentScore && !clipLock)
+                                if (traversedScore + segmentScore >= currentScore && !clipLock)
                                 {
                                     clipLock = true;
-                                }
+                                }*/
                             }
+                           
                             try
                             {
                                 fivetosix(senderIndex);
@@ -497,20 +495,21 @@ namespace Candymap
 
                         scorePath.MoveTo(thisLine[0]);
                         scorePath.ArcTo(new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise,thisLine[1]);
+                        traversedScore += segmentScore;
+
                         if (traversedScore <= currentScore)
                         {
                             collectedPath.MoveTo(thisLine[0]);
                             collectedPath.ArcTo(new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, thisLine[1]);
                             Console.WriteLine(traversedScore + "5-6");
-                            traversedScore += segmentScore;
-                            if (clipLock)
+                            /*if (clipLock)
                             {
                                 pathClipper(thisLine[0], thisLine[1], new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.CounterClockwise, currentScore - traversedScore);
                             }
                             if (traversedScore + segmentScore >= currentScore && !clipLock)
                             {
                                 clipLock = true;
-                            }
+                            }*/
                         }
                         donePoints.Add(thisLine);
                     }
@@ -648,7 +647,6 @@ namespace Candymap
                     skCanvas.DrawPath(streetPath, streetStroke);
                 }
                 //skCanvas.ClipPath(clipperPath, SKClipOperation.Intersect);
-
             }
 
 
@@ -680,13 +678,19 @@ namespace Candymap
                     SkCanvasView.InvalidateSurface();
                 });
             }*/
+            var downSwipeGesture = new SwipeGestureRecognizer { Direction = SwipeDirection.Down };
+            downSwipeGesture.Threshold = 50;
+            downSwipeGesture.Swiped += (sender, e) => { Console.WriteLine("heyhey"+e.Direction.ToString()); };
+            MainScrollView.GestureRecognizers.Add(downSwipeGesture);
 
+            
             MainScrollView.Scrolled += (object sender, ScrolledEventArgs e) =>
             {
-                Console.WriteLine("reached here b");
+                Console.WriteLine(e.ScrollY.ToString());
+            
+
                 if (e.ScrollY > MainScrollView.ContentSize.Height - MainScrollView.Height - 30)
                 {
-                    Console.WriteLine(e.ScrollY.ToString());
                     buttonCreater(TotalIterations);
                     TotalIterations++;
                     //Device.BeginInvokeOnMainThread(() =>
