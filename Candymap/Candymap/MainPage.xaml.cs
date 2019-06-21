@@ -32,7 +32,6 @@ namespace Candymap
             SkCanvasView2.WidthRequest = widgetWidth;
             MainAbsoluteLayout.WidthRequest = widgetWidth;
 
-
             int cbiforcurve = 0;
             var buttons = new List<Button>();
             var skLineList = new List<SKPoint[]>();
@@ -138,7 +137,7 @@ namespace Candymap
                     if (i < numButtonsInPattern / 2.0f)
                     {
                         var x = 0 + placementIndex * (2.0 / (numButtonsInPattern));
-                        var y = currentButtonIndex * heightScale + Math.Sin((i / (numButtonsInPattern / 8.0f)) * Math.PI / 2) * curlinessFactor +10;
+                        var y = 600-(currentButtonIndex * heightScale + Math.Sin((i / (numButtonsInPattern / 8.0f)) * Math.PI / 2) * curlinessFactor +10);
                         //var y = currentButtonIndex * heightScale + rnd.Next(-randomnessFactor, +randomnessFactor/2);
                         AbsoluteLayout.SetLayoutBounds(buttons[currentButtonIndex], new Rectangle(x, y, buttons[currentButtonIndex].Width, buttons[currentButtonIndex].Height));
                         AbsoluteLayout.SetLayoutFlags(buttons[currentButtonIndex], AbsoluteLayoutFlags.XProportional);
@@ -149,7 +148,7 @@ namespace Candymap
                     else if (i == numButtonsInPattern / 2.0f)
                     {
                         var x = 2 - placementIndex * (2.0 / (numButtonsInPattern));
-                        var y = currentButtonIndex * heightScale + 10;
+                        var y = 600-(currentButtonIndex * heightScale + 10);
                         //var y = currentButtonIndex * heightScale + rnd.Next(-randomnessFactor/2, +randomnessFactor);
                         AbsoluteLayout.SetLayoutBounds(buttons[currentButtonIndex], new Rectangle(x, y, buttons[currentButtonIndex].Width, buttons[currentButtonIndex].Height));
                         AbsoluteLayout.SetLayoutFlags(buttons[currentButtonIndex], AbsoluteLayoutFlags.XProportional);
@@ -160,7 +159,7 @@ namespace Candymap
                     else
                     {
                         var x = 2 - placementIndex * (2.0 / (numButtonsInPattern));
-                        var y = currentButtonIndex * heightScale + Math.Sin((i / (numButtonsInPattern / 8.0f)) * Math.PI / 2) * curlinessFactor + 10;
+                        var y = 600-(currentButtonIndex * heightScale + Math.Sin((i / (numButtonsInPattern / 8.0f)) * Math.PI / 2) * curlinessFactor + 10);
                         //var y = currentButtonIndex * heightScale + rnd.Next(-randomnessFactor/2, +randomnessFactor);
                         AbsoluteLayout.SetLayoutBounds(buttons[currentButtonIndex], new Rectangle(x, y, buttons[currentButtonIndex].Width, buttons[currentButtonIndex].Height));
                         AbsoluteLayout.SetLayoutFlags(buttons[currentButtonIndex], AbsoluteLayoutFlags.XProportional);
@@ -281,7 +280,7 @@ namespace Candymap
                             streetPath.ArcTo(new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.Clockwise, firstLineElem[1]);
                             streetPath.MoveTo(secondLineElem[0]);
                             streetPath.ArcTo(new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.Clockwise, secondLineElem[1]);
-
+                            
                             scorePath.MoveTo(elem[0]);
                             scorePath.ArcTo(new SKPoint(100, 100), 45, SKPathArcSize.Small, SKPathDirection.Clockwise, elem[1]);
 
@@ -684,6 +683,7 @@ namespace Candymap
 
             MainScrollView.Scrolled += (object sender, ScrolledEventArgs e) =>
             {
+                Console.WriteLine("reached here b");
                 if (e.ScrollY > MainScrollView.ContentSize.Height - MainScrollView.Height - 30)
                 {
                     Console.WriteLine(e.ScrollY.ToString());
