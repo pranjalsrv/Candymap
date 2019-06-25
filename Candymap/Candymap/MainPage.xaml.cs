@@ -141,7 +141,7 @@ namespace Candymap
                     if (i < numButtonsInPattern / 2.0f)
                     {
                         var x = 0 + placementIndex * (2.0 / (numButtonsInPattern));
-                        var y = currentButtonIndex * heightScale + Math.Sin((i / (numButtonsInPattern / 8.0f)) * Math.PI / 2) * curlinessFactor +10;
+                        var y =  (currentButtonIndex * heightScale + Math.Sin((i / (numButtonsInPattern / 8.0f)) * Math.PI / 2) * curlinessFactor +10);
                         //var y = currentButtonIndex * heightScale + rnd.Next(-randomnessFactor, +randomnessFactor/2);
                         AbsoluteLayout.SetLayoutBounds(buttons[currentButtonIndex], new Rectangle(x, y, buttons[currentButtonIndex].Width, buttons[currentButtonIndex].Height));
                         AbsoluteLayout.SetLayoutFlags(buttons[currentButtonIndex], AbsoluteLayoutFlags.XProportional);
@@ -152,7 +152,7 @@ namespace Candymap
                     else if (i == numButtonsInPattern / 2.0f)
                     {
                         var x = 2 - placementIndex * (2.0 / (numButtonsInPattern));
-                        var y = currentButtonIndex * heightScale + 10;
+                        var y =  (currentButtonIndex * heightScale + 10);
                         //var y = currentButtonIndex * heightScale + rnd.Next(-randomnessFactor/2, +randomnessFactor);
                         AbsoluteLayout.SetLayoutBounds(buttons[currentButtonIndex], new Rectangle(x, y, buttons[currentButtonIndex].Width, buttons[currentButtonIndex].Height));
                         AbsoluteLayout.SetLayoutFlags(buttons[currentButtonIndex], AbsoluteLayoutFlags.XProportional);
@@ -163,7 +163,7 @@ namespace Candymap
                     else
                     {
                         var x = 2 - placementIndex * (2.0 / (numButtonsInPattern));
-                        var y = currentButtonIndex * heightScale + Math.Sin((i / (numButtonsInPattern / 8.0f)) * Math.PI / 2) * curlinessFactor + 10;
+                        var y =  (currentButtonIndex * heightScale + Math.Sin((i / (numButtonsInPattern / 8.0f)) * Math.PI / 2) * curlinessFactor + 10);
                         //var y = currentButtonIndex * heightScale + rnd.Next(-randomnessFactor/2, +randomnessFactor);
                         AbsoluteLayout.SetLayoutBounds(buttons[currentButtonIndex], new Rectangle(x, y, buttons[currentButtonIndex].Width, buttons[currentButtonIndex].Height));
                         AbsoluteLayout.SetLayoutFlags(buttons[currentButtonIndex], AbsoluteLayoutFlags.XProportional);
@@ -185,7 +185,7 @@ namespace Candymap
                     if (i < 3.0f)
                     {
                         var xforcurve = 0 + placementIndex * (2.0 / (6));
-                        var yforcurve = cbiforcurve * curveHeightScale + Math.Sin((i / (6 / 8.0f)) * Math.PI / 2) * curlinessFactor;
+                        var yforcurve = (cbiforcurve * curveHeightScale + Math.Sin((i / (6 / 8.0f)) * Math.PI / 2) * curlinessFactor);
 
                         if (i == 0) { xyPoint.Add(new SKPoint((float)(xforcurve * widgetWidth) + 30, (float)yforcurve + 30)); }
                         else { xyPoint.Add(new SKPoint((float)(xforcurve * widgetWidth), (float)yforcurve + 30)); }
@@ -193,14 +193,14 @@ namespace Candymap
                     else if (i == 3.0f)
                     {
                         var xforcurve = 2 - placementIndex * (2.0 / (6));
-                        var yforcurve = cbiforcurve * curveHeightScale;
+                        var yforcurve = (cbiforcurve * curveHeightScale);
 
                         xyPoint.Add(new SKPoint(((float)xforcurve * widgetWidth) - 30, (float)yforcurve + 30));
                     }
                     else
                     {
                         var xforcurve = 2 - placementIndex * (2.0 / (6));
-                        var yforcurve = cbiforcurve * curveHeightScale + Math.Sin((i / (6 / 8.0f)) * Math.PI / 2) * curlinessFactor;
+                        var yforcurve = (cbiforcurve * curveHeightScale + Math.Sin((i / (6 / 8.0f)) * Math.PI / 2) * curlinessFactor);
 
                         xyPoint.Add(new SKPoint((float)(xforcurve * widgetWidth), (float)yforcurve + 30));
                     }
@@ -670,25 +670,34 @@ namespace Candymap
 
             SkCanvasView.PaintSurface += SkCanvasView_OnPaintSurface;
             SkCanvasView2.PaintSurface += SkCanvasView_OnPaintSurface;
-            /*if(MainScrollView.ScrollY >= (MainScrollView.ContentSize.Height - MainScrollView.Height) + 1) {
-                buttonCreater(TotalIterations);
-                TotalIterations++;
-                //currentYLocation = e.ScrollY;
-                Device.BeginInvokeOnMainThread(() => {
-                    SkCanvasView.InvalidateSurface();
-                });
-            }*/
+
+            /*MainScrollView.Scrolled += (object sender, ScrolledEventArgs e) =>
+            {
+                Console.WriteLine(MainScrollView.ScrollY.ToString() + "hey " + MainScrollView.ContentSize.Height.ToString() + "hey " + MainScrollView.Height.ToString());
+                if (MainScrollView.ScrollY >= (MainScrollView.ContentSize.Height - MainScrollView.Height) + 1)
+                {
+                    buttonCreater(TotalIterations);
+                    TotalIterations++;
+                    //currentYLocation = e.ScrollY;
+                    Device.BeginInvokeOnMainThread(() =>
+                    {
+                        SkCanvasView.InvalidateSurface();
+                    });
+                }
+            };*/
             var downSwipeGesture = new SwipeGestureRecognizer { Direction = SwipeDirection.Down };
             downSwipeGesture.Threshold = 50;
-            downSwipeGesture.Swiped += (sender, e) => { Console.WriteLine("heyhey"+e.Direction.ToString()); };
+            downSwipeGesture.Swiped += (sender, e) => { Console.WriteLine("heyhey"+e.Direction.ToString());
+                MainScrollView.ScrollToAsync(buttons[30],0,true);
+            };
+            OuterAbsoluteLayout.GestureRecognizers.Add(downSwipeGesture);
             MainScrollView.GestureRecognizers.Add(downSwipeGesture);
 
-            
+
             MainScrollView.Scrolled += (object sender, ScrolledEventArgs e) =>
             {
                 Console.WriteLine(e.ScrollY.ToString());
             
-
                 if (e.ScrollY > MainScrollView.ContentSize.Height - MainScrollView.Height - 30)
                 {
                     buttonCreater(TotalIterations);
